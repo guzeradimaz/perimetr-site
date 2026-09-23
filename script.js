@@ -10,7 +10,7 @@ var CONFIG = {
   TELEGRAM_USER: 'andreew_8',
   PHONE: '+375292978137',
   BOT_TOKEN: '7984341771:AAEddTr3VZqnZtMsS0Emm_2SJ7ODKPxmRn4',
-  CHAT_ID: ''
+  CHAT_ID: '-1003893474648'
 };
 
 /* ---------- ШАПКА / БУРГЕР ---------- */
