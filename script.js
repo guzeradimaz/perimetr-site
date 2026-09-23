@@ -92,9 +92,82 @@ function collect(form) {
     if (el.type === 'checkbox' || !el.name) return;
     var wrap = el.closest('label');
     if (wrap && wrap.hidden) return;
-    if (el.value.trim()) lines.push(el.name + ': ' + el.value.trim());
+    if (el.name === 'website') return;
+    if (el.value.trim()) lines.push(el.name + ': ' + el.value.trim().slice(0, 500));
   });
   return lines;
+}
+
+/* ---------- ЗАЩИТА ФОРМ ОТ СПАМА ----------
+   Сервера нет, поэтому всё проверяется в браузере: это отсекает ботов,
+   которые заполняют формы, но не того, кто вытащит токен из кода. */
+var LIMIT = { minFillMs: 3000, pauseMs: 60 * 1000, perHour: 3 };
+
+// время первого касания формы — боты отправляют мгновенно
+document.addEventListener('focusin', function (e) {
+  var f = e.target.form;
+  if (f && !f.dataset.t) f.dataset.t = Date.now();
+});
+
+function sentLog(add) {
+  var log = [];
+  try { log = JSON.parse(localStorage.getItem('leadLog') || '[]'); } catch (e) {}
+  var hourAgo = Date.now() - 3600 * 1000;
+  log = log.filter(function (t) { return t > hourAgo; });
+  if (add) { log.push(Date.now()); try { localStorage.setItem('leadLog', JSON.stringify(log)); } catch (e) {} }
+  return log;
+}
+
+// null — можно отправлять, 'bot' — тихо «принять» и выбросить, иначе — текст ошибки
+function checkLead(form) {
+  if (form.elements.website && form.elements.website.value) return 'bot';
+  if (!form.dataset.t || Date.now() - form.dataset.t < LIMIT.minFillMs) return 'bot';
+
+  var fields = form.querySelectorAll('input[type=text],input[type=tel],textarea');
+  for (var i = 0; i < fields.length; i++) {
+    if (/https?:|www\.|t\.me\/|@\w+\.\w/i.test(fields[i].value)) return 'Уберите, пожалуйста, ссылки из заявки.';
+  }
+  var name = form.elements['Имя'];
+  if (name && (name.value.trim().length < 2 || /^\d+$/.test(name.value.trim()))) return 'Укажите, пожалуйста, имя.';
+  var tel = form.elements['Телефон'];
+  if (tel) {
+    var d = tel.value.replace(/\D/g, '');
+    var ok = (d.length === 12 && d.indexOf('375') === 0) || (d.length === 11 && d.indexOf('80') === 0) || d.length === 9;
+    if (!ok) return 'Проверьте номер: например, +375 29 123-45-67.';
+  }
+  var log = sentLog(false);
+  if (log.length && Date.now() - log[log.length - 1] < LIMIT.pauseMs) return 'Заявка уже отправлена. Если нужно что-то добавить, подождите минуту.';
+  if (log.length >= LIMIT.perHour) return 'Вы уже отправили несколько заявок — мы их получили. Срочно? Позвоните: ' + CONFIG.PHONE;
+  return null;
+}
+
+function showErr(form, msg) {
+  var el = form.querySelector('.form__err');
+  if (!el) {
+    el = document.createElement('p');
+    el.className = 'form__err';
+    el.setAttribute('role', 'alert');
+    var btn = form.querySelector('button[type=submit]');
+    btn.parentNode.insertBefore(el, btn);
+  }
+  el.textContent = msg || '';
+  el.hidden = !msg;
+}
+
+// боту показываем «успех», но ничего не отправляем
+function fakeDone(form) {
+  var btn = form.querySelector('button[type=submit]');
+  if (btn) { btn.textContent = 'Заявка отправлена ✓'; btn.disabled = true; }
+}
+
+// true — заявку можно отправлять
+function guard(form) {
+  var res = checkLead(form);
+  if (res === 'bot') return false;
+  showErr(form, res);
+  if (res) return false;
+  sentLog(true);
+  return true;
 }
 
 function sendLead(title, lines, form) {
@@ -118,9 +191,6 @@ function sendLead(title, lines, form) {
     done();
   }
 
-  // ловушка для ботов: скрытое поле заполняют только спамеры
-  if (form && form.elements.website && form.elements.website.value) { done(); return; }
-
   if (!CONFIG.BOT_TOKEN || !CONFIG.CHAT_ID) { fallback(); return; }
 
   if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
@@ -140,6 +210,8 @@ function sendLead(title, lines, form) {
 document.querySelectorAll('form[data-form]').forEach(function (form) {
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (checkLead(form) === 'bot') { fakeDone(form); return; }
+    if (!guard(form)) return;
     sendLead(form.dataset.form, collect(form), form);
   });
 });
@@ -198,9 +270,13 @@ function renderQuiz() {
     qNext.style.display = 'none';
     document.getElementById('quizForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      var lines = collect(this);
-      Object.keys(state.answers).forEach(function (k) { lines.push(k + ' ' + state.answers[k]); });
-      sendLead('Заявка из калькулятора', lines, this);
+      var isBot = checkLead(this) === 'bot';
+      if (!isBot && !guard(this)) return;
+      if (!isBot) {
+        var lines = collect(this);
+        Object.keys(state.answers).forEach(function (k) { lines.push(k + ' ' + state.answers[k]); });
+        sendLead('Заявка из калькулятора', lines, this);
+      }
       qBody.innerHTML = '<div class="quiz__done"><b>Заявка принята</b><p>Свяжемся с вами и подготовим расчёт. Обычно отвечаем в течение рабочего дня.</p></div>';
       qNext.style.display = 'none';
       qPrev.style.visibility = 'hidden';

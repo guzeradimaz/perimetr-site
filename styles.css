@@ -1231,3 +1231,5 @@ body:not(.is-ready) .hero__badge,body:not(.is-ready) .hero__scroll{opacity:0}
 .msgr__btn--call{background:var(--accent);color:var(--accent-ink)}
 .msgr__btn--tg{background:#229ED9}
 .cta--top{border-top:1px solid rgba(255,255,255,.06)}
+.form__err{margin:0;padding:10px 14px;border-radius:10px;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);color:#fca5a5;font-size:14px;font-weight:600}
+[data-theme="light"] .form__err{color:#b91c1c}
