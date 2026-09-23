@@ -702,6 +702,8 @@ a.topbar__item:hover{color:var(--accent-2)}
 .fab__btn svg{width:23px;height:23px}
 .fab__btn:hover{transform:scale(1.08)}
 .fab__btn--tg{background:#229ED9}
+.fab__btn--wa{background:#25D366}
+.fab__btn--vb{background:#7360F2}
 .fab__btn--call{background:var(--accent);color:var(--accent-ink)}
 .fab__btn--call::before{
   content:'';position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);
@@ -1213,3 +1215,20 @@ body:not(.is-ready) .hero__badge,body:not(.is-ready) .hero__scroll{opacity:0}
 .compare__table tbody tr:last-child>*{border-bottom:0}
 .compare__note{margin:14px 0 0;font-size:14px;color:var(--muted)}
 @media (max-width:640px){.compare__table{font-size:14px}.compare__table th,.compare__table td{padding:12px 14px}}
+
+/* ---------- WHATSAPP / VIBER В CTA ---------- */
+.msgr{display:flex;gap:10px;flex-wrap:wrap}
+.msgr__btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:999px;color:#fff;font-weight:600;font-size:15px;text-decoration:none;transition:transform .3s var(--ease),filter .3s ease}
+.msgr__btn svg{width:20px;height:20px}
+.msgr__btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.msgr__btn--wa{background:#1DA851}
+.msgr__btn--vb{background:#7360F2}
+
+/* ---------- СТАТЬИ НА ГЛАВНОЙ ---------- */
+.posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:36px 0 32px}
+.post{position:relative;display:flex;flex-direction:column;gap:14px;min-height:190px;padding:24px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--text);text-decoration:none;transition:border-color .3s ease,transform .3s var(--ease)}
+.post:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line));transform:translateY(-3px)}
+.post__n{font:800 14px 'Archivo',sans-serif;color:var(--accent);letter-spacing:.06em}
+.post h3{margin:0;font:800 20px/1.25 'Archivo',sans-serif;letter-spacing:-.01em}
+.post__more{margin-top:auto;color:var(--muted);font-size:14px;font-weight:600}
+.post:hover .post__more{color:var(--accent)}
