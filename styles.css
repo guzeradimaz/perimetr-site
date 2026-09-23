@@ -1,5 +1,5 @@
 /* ==========================================================
-   Периметр — дизайн-система «Industrial Editorial»
+   Монтаж Штакет — дизайн-система «Industrial Editorial»
    Тёмная база, охристо-оранжевый акцент, крупная типографика
    Archivo, стеклянные панели, зерно и мягкий свет.
    Светлая тема — через [data-theme="light"] на <html>.
@@ -758,15 +758,7 @@ a.topbar__item:hover{color:var(--accent-2)}
   display:flex;gap:2px;font-family:var(--font-display);font-weight:800;font-size:27px;
   letter-spacing:.24em;color:#fff;margin-top:6px;text-transform:uppercase;
 }
-.preloader__name span{opacity:0;transform:translateY(16px);animation:plUp .55s var(--ease) forwards}
-.preloader__name span:nth-child(1){animation-delay:.45s}
-.preloader__name span:nth-child(2){animation-delay:.5s}
-.preloader__name span:nth-child(3){animation-delay:.55s}
-.preloader__name span:nth-child(4){animation-delay:.6s}
-.preloader__name span:nth-child(5){animation-delay:.65s}
-.preloader__name span:nth-child(6){animation-delay:.7s}
-.preloader__name span:nth-child(7){animation-delay:.75s}
-.preloader__name span:nth-child(8){animation-delay:.8s}
+.preloader__name span{animation-delay:calc(.45s + var(--i,0) * .045s)!important;opacity:0;transform:translateY(16px);animation:plUp .55s var(--ease) forwards}
 @keyframes plUp{to{opacity:1;transform:none}}
 .preloader__sub{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.42);opacity:0;animation:plUp .5s ease .9s forwards}
 .preloader__line{width:min(280px,54vw);height:2px;background:rgba(255,255,255,.13);border-radius:2px;overflow:hidden;margin-top:8px}
@@ -1232,3 +1224,10 @@ body:not(.is-ready) .hero__badge,body:not(.is-ready) .hero__scroll{opacity:0}
 .post h3{margin:0;font:800 20px/1.25 'Archivo',sans-serif;letter-spacing:-.01em}
 .post__more{margin-top:auto;color:var(--muted);font-size:14px;font-weight:600}
 .post:hover .post__more{color:var(--accent)}
+
+.hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+.preloader__name .sp{width:.5em}
+.msgr__btn--call{background:var(--accent);color:var(--accent-ink)}
+.msgr__btn--tg{background:#229ED9}
+.cta--top{border-top:1px solid rgba(255,255,255,.06)}

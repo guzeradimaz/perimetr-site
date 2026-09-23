@@ -1,13 +1,15 @@
 /* ============================================================
    НАСТРОЙКИ
-   Чтобы заявки падали прямо в Telegram-бота, заполните BOT_TOKEN
-   и CHAT_ID. Если оставить пустыми — форма откроет чат
-   @andreew_8 и положит текст заявки в буфер обмена.
+   Заявки уходят ботом @andrew_website_bot в Telegram-канал (CHAT_ID).
+   Токен виден в коде страницы — это осознанный выбор владельца.
+   Если токен утёк: @BotFather → /revoke, новый токен вписать сюда.
+   Если отправка не удалась, форма откроет чат @andreew_8
+   и положит текст заявки в буфер обмена.
    ============================================================ */
 var CONFIG = {
   TELEGRAM_USER: 'andreew_8',
   PHONE: '+375292978137',
-  BOT_TOKEN: '',
+  BOT_TOKEN: '7984341771:AAEddTr3VZqnZtMsS0Emm_2SJ7ODKPxmRn4',
   CHAT_ID: ''
 };
 
@@ -96,30 +98,43 @@ function collect(form) {
 }
 
 function sendLead(title, lines, form) {
-  var text = '🏠 ' + title + '\n' + lines.join('\n') + '\nИсточник: ' + location.href;
+  var text = '🏠 ' + title + '\n' + lines.join('\n') +
+    '\nСтраница: ' + location.href +
+    '\nВремя: ' + new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Minsk' });
+  var btn = form && form.querySelector('button[type=submit]');
+  var label = btn ? btn.textContent : '';
 
   function done() {
-    if (!form) return;
-    var btn = form.querySelector('button[type=submit]');
-    if (btn) { btn.textContent = 'Заявка отправлена ✓'; btn.disabled = true; }
+    if (!btn) return;
+    btn.textContent = 'Заявка отправлена ✓';
+    btn.disabled = true;
     setTimeout(function () { if (!modal.hidden) closeModal(); }, 1400);
   }
 
-  if (CONFIG.BOT_TOKEN && CONFIG.CHAT_ID) {
-    fetch('https://api.telegram.org/bot' + CONFIG.BOT_TOKEN + '/sendMessage', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: text })
-    }).then(done).catch(fallback);
-  } else {
-    fallback();
-  }
-
+  // запасной путь: текст в буфер обмена и чат менеджера
   function fallback() {
     if (navigator.clipboard) { navigator.clipboard.writeText(text).catch(function () {}); }
     window.open('https://t.me/' + CONFIG.TELEGRAM_USER, '_blank', 'noopener');
     done();
   }
+
+  // ловушка для ботов: скрытое поле заполняют только спамеры
+  if (form && form.elements.website && form.elements.website.value) { done(); return; }
+
+  if (!CONFIG.BOT_TOKEN || !CONFIG.CHAT_ID) { fallback(); return; }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
+  fetch('https://api.telegram.org/bot' + CONFIG.BOT_TOKEN + '/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: text })
+  })
+    .then(function (r) { return r.json(); })
+    .then(function (d) { if (d.ok) done(); else throw new Error(d.description); })
+    .catch(function () {
+      if (btn) { btn.disabled = false; btn.textContent = label; }
+      fallback();
+    });
 }
 
 document.querySelectorAll('form[data-form]').forEach(function (form) {
