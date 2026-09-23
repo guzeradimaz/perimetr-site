@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+Disallow: /404.html
+
+# AI-поисковики и ассистенты: разрешаем, чтобы сайт цитировали в ответах
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: YandexBot
+Allow: /
+
+Sitemap: https://xn--80aapcvihh1bcd1e.xn--90ais/sitemap.xml
